@@ -1,0 +1,58 @@
+import requests
+from bs4 import BeautifulSoup
+
+# Set the URL to scrape
+url = "https://en.wikipedia.org/wiki/Python_(programming_language)"
+
+# Send a GET request to the URL
+response = requests.get(url)
+
+# Use BeautifulSoup to parse the HTML content of the response
+soup = BeautifulSoup(response.content, 'html.parser')
+
+# Find the first paragraph element in the HTML
+first_paragraph = soup.find('p')
+
+# Print the text content of the first paragraph
+print(first_paragraph.text)
+
+# Find all the headers in the HTML
+headers = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+
+# Print the text content of each header
+for header in headers:
+    print(header.text)
+
+# Find all the links in the HTML
+links = soup.find_all('a')
+
+# Print the href attribute of each link
+for link in links:
+    print(link.get('href'))
+    
+# Find all the images in the HTML
+images = soup.find_all('img')
+
+# Print the src attribute of each image
+for image in images:
+    print(image.get('src'))
+
+# Find all the tables in the HTML
+tables = soup.find_all('table')
+
+# Print the content of each table
+for table in tables:
+    rows = table.find_all('tr')
+    for row in rows:
+        cells = row.find_all('td')
+        for cell in cells:
+            print(cell.text.strip())
+
+# Find all the lists in the HTML
+lists = soup.find_all('ul')
+
+# Print the content of each list
+for lst in lists:
+    items = lst.find_all('li')
+    for item in items:
+        print(item.text.strip())
