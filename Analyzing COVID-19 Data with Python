@@ -1,0 +1,53 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load the COVID-19 data from a CSV file
+df = pd.read_csv('covid_data.csv')
+
+# Print the first 5 rows of the data
+print(df.head())
+
+# Get the total number of confirmed cases and deaths
+total_confirmed = df['Confirmed'].sum()
+total_deaths = df['Deaths'].sum()
+
+# Print the total number of confirmed cases and deaths
+print("Total confirmed cases:", total_confirmed)
+print("Total deaths:", total_deaths)
+
+# Calculate the daily new cases and deaths
+df['New Confirmed'] = df['Confirmed'].diff()
+df['New Deaths'] = df['Deaths'].diff()
+
+# Plot the daily new cases and deaths over time
+plt.plot(df['Date'], df['New Confirmed'], label='New Confirmed')
+plt.plot(df['Date'], df['New Deaths'], label='New Deaths')
+plt.legend()
+plt.title("Daily New COVID-19 Cases and Deaths")
+plt.xlabel("Date")
+plt.ylabel("Number of Cases")
+plt.show()
+
+# Calculate the daily percent change in cases and deaths
+df['Confirmed Percent Change'] = df['Confirmed'].pct_change() * 100
+df['Deaths Percent Change'] = df['Deaths'].pct_change() * 100
+
+# Plot the daily percent change in cases and deaths over time
+plt.plot(df['Date'], df['Confirmed Percent Change'], label='Confirmed Percent Change')
+plt.plot(df['Date'], df['Deaths Percent Change'], label='Deaths Percent Change')
+plt.legend()
+plt.title("Daily Percent Change in COVID-19 Cases and Deaths")
+plt.xlabel("Date")
+plt.ylabel("Percent Change")
+plt.show()
+
+# Get the top 10 countries with the highest number of confirmed cases
+top_countries = df.groupby('Country/Region').max().sort_values(by='Confirmed', ascending=False).head(10)
+
+# Plot the total confirmed cases for the top 10 countries
+plt.bar(top_countries.index, top_countries['Confirmed'])
+plt.title("Top 10 Countries by Total Confirmed COVID-19 Cases")
+plt.xlabel("Country")
+plt.ylabel("Total Confirmed Cases")
+plt.xticks(rotation=90)
+plt.show()
