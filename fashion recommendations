@@ -1,0 +1,63 @@
+# Import libraries
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+from google.colab import files
+from io import BytesIO
+
+# Load pre-trained model
+model = tf.keras.applications.InceptionV3(weights='imagenet', include_top=True)
+
+# Load dataset of garment images
+import zipfile
+
+# Define the path to the zip file
+zip_file = 'Images.zip'
+
+# Define the path to the directory where you want to extract the files
+extract_path = 'Images'
+
+# Open the zip file and extract its contents to the extract_path directory
+with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+    zip_ref.extractall(extract_path)
+
+dataset_path = 'Images/'
+dataset = tf.keras.preprocessing.image_dataset_from_directory(dataset_path, image_size=(299, 299), batch_size=32)
+
+# Get embeddings of dataset images
+embeddings = model.predict(dataset)
+
+# Define function to get embeddings of uploaded image
+def get_image_embedding(image):
+    x = tf.keras.preprocessing.image.img_to_array(image)
+    x = np.expand_dims(x, axis=0)
+    x = tf.keras.applications.inception_v3.preprocess_input(x)
+    embedding = model.predict(x)
+    return embedding
+
+# Upload image from user
+
+uploaded_file = files.upload()
+filename = list(uploaded_file.keys())[0] # get the actual key
+img = tf.keras.preprocessing.image.load_img(BytesIO(uploaded_file[filename]), target_size=(299, 299))
+
+# Get embeddings of uploaded image
+uploaded_embedding = get_image_embedding(img)
+
+# Calculate distances between embeddings
+distances = tf.norm(embeddings - uploaded_embedding, axis=-1)
+
+# Get indices of most similar images
+similar_indices = tf.argsort(distances)[:10]
+
+# Get the unbatched dataset iterator
+iterator = iter(dataset.unbatch())
+
+# Plot most similar images
+fig, ax = plt.subplots(2, 5, figsize=(10, 4))
+for i, index in enumerate(similar_indices):
+    img_tuple = next(iterator)
+    img = img_tuple[0]
+    ax[i // 5, i % 5].imshow(img.numpy().astype('uint8'))
+    ax[i // 5, i % 5].axis('off')
+plt.show()
